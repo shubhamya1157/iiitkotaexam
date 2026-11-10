@@ -12,29 +12,26 @@ A web-based exam application built using **HTML, CSS, JavaScript, PHP, and MySQL
 
 ```text
 iiitkotaexam/
-│
 ├── backend/
-│   ├── auth.php              # Authentication, sessions and roles
-│   ├── db.php                # MySQL database connection
-│   ├── exam.php              # Quiz scheduling and grading helpers
-│   ├── login.php             # Handles login form submissions
-│   ├── logout.php            # Ends the user session
-│   └── schema.sql            # Database and table creation
-│
+│   ├── auth.php             # Checks credentials and manages session access
+│   ├── db.php               # Opens the MySQL connection
+│   ├── exam.php             # Handles quiz scheduling, grading, and form tokens
+│   ├── login.php            # Processes login form submissions
+│   ├── logout.php           # Ends the session and expires its cookie
+│   └── schema.sql           # Creates the database and tables
 ├── frontend/
 │   ├── admin/
-│   │   └── dashboard.php     # Admin dashboard
-│   │
+│   │   └── dashboard.php    # Creates quizzes and displays submissions
 │   ├── student/
-│   │   └── dashboard.php     # Student dashboard
-│   │
+│   │   └── dashboard.php    # Lists quizzes, accepts answers, and displays scores
 │   ├── css/
-│   │   └── index.css
-│   │
-│   ├── index.html
-│   └── login.html
-│
-├── .env
+│   │   ├── index.css        # Shared styles, homepage, and login form
+│   │   └── exam.css         # Dashboard layouts and quiz forms
+│   ├── js/
+│   │   ├── quiz-editor.js   # Adds and removes question fields
+│   │   └── quiz-timer.js    # Updates the student quiz countdown
+│   ├── index.html          # Homepage
+│   └── login.html          # Login form
 ├── .gitignore
 └── README.md
 ```
@@ -147,12 +144,13 @@ mysql --version
 Check MySQLi extension:
 
 ```bash
-php -m | grep -i mysqli
+php -m | grep -Ei "^(mysqli|mbstring)$"
 ```
 
 Expected output:
 
 ```text
+mbstring
 mysqli
 ```
 
@@ -196,11 +194,7 @@ There are two ways to import the database schema.
 
 ### Option A: Using MySQL command line
 
-Open your project directory:
-
-```bash
-cd "/Users/shubham/Desktop/iiitkotaexam"
-```
+Open a terminal in your checkout’s root directory, where this README is located.
 
 Connect to MySQL:
 
@@ -253,23 +247,23 @@ GRANT SELECT, INSERT ON iiitkotaexam.quiz_attempts
 TO 'quiz_app'@'127.0.0.1';
 
 INSERT INTO iiitkotaexam.users (email, password, role)
-VALUES ('student@example.com', 'demo123', 'student');
+VALUES
+    ('student@example.com', 'demo123', 'student'),
+    ('admin@example.com', 'demo123', 'admin');
 ```
 
-This creates a dedicated MySQL user for the PHP application and inserts a test student.
+This creates a dedicated MySQL user for the PHP application and inserts a test student and a test admin.
 
 **Important:**
 
 - If `quiz_app` already exists, use its existing password.
-- Insert the test student only once because email addresses must be unique.
+- Insert each test account only once because email addresses must be unique.
 - This example assumes the current database uses a `password` column.
 - The example uses plain-text passwords for development only.
 
 ## 5. Start the PHP Development Server
 
-Open a new terminal in the project root directory.
-
-Execute:
+Open a terminal in the project root and pass the MySQL application account password through the `QUIZ_DB_PASSWORD` environment variable.
 
 ```bash
 QUIZ_DB_PASSWORD='local_db_password' php -S 127.0.0.1:8000
@@ -299,19 +293,15 @@ The PHP server runs on port `8000`.
 | Admin dashboard | http://127.0.0.1:8000/frontend/admin/dashboard.php |
 | Student dashboard | http://127.0.0.1:8000/frontend/student/dashboard.php |
 
-## Backend PHP Endpoints
+## Login and Sessions
 
-| Endpoint | Purpose |
-|---|---|
-| `/backend/login.php` | Handles login form POST requests |
-| `/backend/logout.php` | Logs out the current user |
-| `/backend/exam.php` | Quiz scheduling and grading helpers |
-| `/backend/auth.php` | Authentication and session helpers |
-| `/backend/db.php` | Database connection |
+1. The login form sends the email and password to `backend/login.php`. The server checks the credentials against MySQL and reads the account role.
+2. After a successful login, PHP generates a fresh session ID and stores the user ID and role in the server-side session. The browser receives a cookie containing the session ID.
+3. On later requests, the browser sends the cookie so PHP can load the session. Each dashboard checks that the session has the required role before loading quiz data.
+4. Quiz and logout forms include a CSRF token. The server compares it with the token stored in the session before processing the submission.
+5. Logging out destroys the session, expires the cookie, and returns the browser to the login page.
 
-The browser sends the form data to PHP, PHP processes the login request, and PHP communicates with MySQL using MySQLi.
-
-**Note:** `auth.php` and `db.php` are internal PHP files. They should not be exposed as public application pages.
+The session cookie uses `HttpOnly` and `SameSite=Lax`. PHP adds `Secure` when it detects HTTPS.
 
 # Ports Used
 
@@ -323,10 +313,10 @@ The browser sends the form data to PHP, PHP processes the login request, and PHP
 
 # Test Login Credentials
 
-```text
-Email: student@example.com
-Password: demo123
-```
+| Role | Email | Password |
+| --- | --- | --- |
+| Student | `student@example.com` | `demo123` |
+| Admin | `admin@example.com` | `demo123` |
 
 These are development-only credentials.
 
