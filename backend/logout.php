@@ -7,6 +7,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 start_app_session();
+require_once __DIR__ . '/exam.php';
+checkCsrf();
 $_SESSION = [];
 
 if (ini_get('session.use_cookies')) {

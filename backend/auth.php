@@ -29,7 +29,7 @@ function authenticate($db, $email, $password)
 }
 
 // Start a session so PHP can remember who is logged in between requests.
-function start_app_session(): void
+function start_app_session()
 {
     if (session_status() === PHP_SESSION_ACTIVE) {
         return;
@@ -45,7 +45,7 @@ function start_app_session(): void
 }
 
 // Send visitors to login if their session lacks the required role.
-function require_role(string $role, string $loginUrl): void
+function require_role($role, $loginUrl)
 {
     start_app_session();
 

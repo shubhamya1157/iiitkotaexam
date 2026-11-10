@@ -11,12 +11,12 @@ A web-based exam application built using **HTML, CSS, JavaScript, PHP, and MySQL
 ## Folder Structure
 
 ```text
-iiitkotaexam-copy/
+iiitkotaexam/
 │
 ├── backend/
 │   ├── auth.php              # Authentication, sessions and roles
 │   ├── db.php                # MySQL database connection
-│   ├── exam.php              # Exam functionality (under development)
+│   ├── exam.php              # Quiz scheduling and grading helpers
 │   ├── login.php             # Handles login form submissions
 │   ├── logout.php            # Ends the user session
 │   └── schema.sql            # Database and table creation
@@ -37,6 +37,59 @@ iiitkotaexam-copy/
 ├── .env
 ├── .gitignore
 └── README.md
+```
+
+## Database Schema
+
+The MySQL database is named `iiitkotaexam`. The importable schema is in [backend/schema.sql](backend/schema.sql).
+
+| Table | Purpose |
+| --- | --- |
+| `users` | Stores admin and student accounts with unique email addresses. |
+| `quizzes` | Stores quiz titles, schedules, and multiple-choice questions as JSON. |
+| `quiz_attempts` | Stores each student's score and submission time. The composite primary key allows one attempt per quiz per student. |
+
+`quiz_attempts.quiz_id` references `quizzes.id`. The application uses `users.id` as `quiz_attempts.student_id`. The quiz opening, closing, and submission times are stored as Unix timestamps in seconds.
+
+```sql
+-- Create the app database if it is missing.
+CREATE DATABASE IF NOT EXISTS iiitkotaexam;
+
+-- Run the statements below in this database.
+USE iiitkotaexam;
+
+-- Each row in this table represents one user account.
+CREATE TABLE IF NOT EXISTS users (
+    -- MySQL automatically assigns the next ID to each new user.
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    email VARCHAR(254) NOT NULL,
+    -- Store the password as plain text.
+    password VARCHAR(255) NOT NULL,
+    -- A user can be an admin or a student. New users default to student.
+    role ENUM('admin', 'student') NOT NULL DEFAULT 'student',
+    -- MySQL records the time when the account is created.
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    -- The ID identifies the account, and the email must be unique.
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_users_email (email)
+);
+CREATE TABLE IF NOT EXISTS quizzes (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(150) NOT NULL,
+    opens_at BIGINT NOT NULL,
+    closes_at BIGINT NOT NULL,
+    questions JSON NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS quiz_attempts (
+    quiz_id INT UNSIGNED NOT NULL,
+    student_id BIGINT UNSIGNED NOT NULL,
+    score SMALLINT UNSIGNED NOT NULL,
+    submitted_at BIGINT NOT NULL,
+    PRIMARY KEY (quiz_id, student_id),
+    FOREIGN KEY (quiz_id) REFERENCES quizzes(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 ```
 
 # How to Run Locally (macOS)
@@ -146,7 +199,7 @@ There are two ways to import the database schema.
 Open your project directory:
 
 ```bash
-cd "/Users/shubham/Desktop/iiitkotaexam copy"
+cd "/Users/shubham/Desktop/iiitkotaexam"
 ```
 
 Connect to MySQL:
@@ -191,6 +244,12 @@ CREATE USER IF NOT EXISTS 'quiz_app'@'127.0.0.1'
 IDENTIFIED BY 'local_db_password';
 
 GRANT SELECT ON iiitkotaexam.users
+TO 'quiz_app'@'127.0.0.1';
+
+GRANT SELECT, INSERT ON iiitkotaexam.quizzes
+TO 'quiz_app'@'127.0.0.1';
+
+GRANT SELECT, INSERT ON iiitkotaexam.quiz_attempts
 TO 'quiz_app'@'127.0.0.1';
 
 INSERT INTO iiitkotaexam.users (email, password, role)
@@ -246,7 +305,7 @@ The PHP server runs on port `8000`.
 |---|---|
 | `/backend/login.php` | Handles login form POST requests |
 | `/backend/logout.php` | Logs out the current user |
-| `/backend/exam.php` | Exam functionality (under development) |
+| `/backend/exam.php` | Quiz scheduling and grading helpers |
 | `/backend/auth.php` | Authentication and session helpers |
 | `/backend/db.php` | Database connection |
 
@@ -271,4 +330,8 @@ Password: demo123
 
 These are development-only credentials.
 
+## Quizzes
 
+Sign in as an admin to create a multiple-choice quiz and schedule its opening and closing times in IST. All student accounts can submit one attempt during that window. Students see their scores after submission, and admins can view submissions on their dashboard.
+
+For an existing database, reimport the schema and apply the quiz table grants above. PHP 8.2 or newer with MySQLi and mbstring is required.

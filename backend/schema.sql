@@ -20,3 +20,19 @@ CREATE TABLE IF NOT EXISTS users (
     PRIMARY KEY (id),
     UNIQUE KEY uq_users_email (email)
 );
+CREATE TABLE IF NOT EXISTS quizzes (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(150) NOT NULL,
+    opens_at BIGINT NOT NULL,
+    closes_at BIGINT NOT NULL,
+    questions JSON NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS quiz_attempts (
+    quiz_id INT UNSIGNED NOT NULL,
+    student_id BIGINT UNSIGNED NOT NULL,
+    score SMALLINT UNSIGNED NOT NULL,
+    submitted_at BIGINT NOT NULL,
+    PRIMARY KEY (quiz_id, student_id),
+    FOREIGN KEY (quiz_id) REFERENCES quizzes(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

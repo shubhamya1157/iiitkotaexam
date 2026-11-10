@@ -1,0 +1,171 @@
+main {
+    width: min(58rem, 100% - 2rem);
+    margin: clamp(1.5rem, 5vw, 3.5rem) auto;
+}
+
+header,
+.actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+header {
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #ccc;
+}
+
+h1,
+h2,
+h3 {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.eyebrow {
+    margin: 0 0 0.4rem;
+    color: #53565a;
+    font-weight: 700;
+}
+
+section {
+    padding: clamp(1rem, 4vw, 2rem);
+    margin-bottom: 1rem;
+
+    border: 1px solid #d6dfeb;
+    border-radius: 0.25rem;
+    background: white;
+}
+
+article {
+    padding: 1rem 0;
+    border-bottom: 1px solid #d6dfeb;
+}
+
+article:last-child {
+    border-bottom: 0;
+}
+
+.grid {
+    display: grid;
+
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    gap: 0 1rem;
+}
+
+label {
+    display: block;
+    margin: 0.75rem 0;
+    font-weight: 600;
+}
+
+input:not([type="radio"]),
+textarea,
+select {
+    display: block;
+    width: 100%;
+    min-width: 0;
+
+    padding: 0.55rem;
+    margin-top: 0.25rem;
+
+    border: 1px solid #8597ad;
+    border-radius: 0.35rem;
+
+    font: inherit;
+    font-weight: 400;
+    background: white;
+    color: inherit;
+}
+
+fieldset {
+    min-inline-size: 0;
+    margin: 1rem 0;
+    padding: 0.5rem 1rem;
+
+    border: 1px solid #d6dfeb;
+    border-radius: 0.5rem;
+}
+
+legend {
+    font-weight: 700;
+    overflow-wrap: anywhere;
+    max-width: 100%;
+}
+
+.choice {
+    display: flex;
+    gap: 0.5rem;
+    align-items: baseline;
+
+    font-weight: 400;
+    overflow-wrap: anywhere;
+}
+
+button,
+.button {
+    display: inline-block;
+    padding: 0.55rem 0.85rem;
+
+    border: 1px solid #214ba7;
+    border-radius: 0.35rem;
+
+    background: #214ba7;
+    color: white;
+
+    text-decoration: none;
+    font: inherit;
+    cursor: pointer;
+}
+
+.secondary {
+    background: white;
+    color: #214ba7;
+}
+
+button:disabled {
+    opacity: 0.55;
+    cursor: default;
+}
+
+.secondary:hover:not(:disabled) {
+    background: #edf3ff;
+}
+
+a {
+    color: #214ba7;
+}
+
+.error {
+    color: #a01c26;
+}
+
+.success {
+    color: #14623c;
+}
+
+.table-wrap {
+    overflow-x: auto;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    text-align: left;
+}
+
+th,
+td {
+    padding: 0.6rem;
+    border-bottom: 1px solid #d6dfeb;
+}
+
+@media (max-width: 36rem) {
+    .grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
