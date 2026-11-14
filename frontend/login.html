@@ -25,14 +25,10 @@
         <a class="back-link" href="index.html">Back to home</a>
     </main>
     <script>
-        const messages = {
-            invalid: 'The email or password is incorrect.',
-            unavailable: 'Login is temporarily unavailable. Please try again later.',
-        };
         const error = new URLSearchParams(window.location.search).get('error');
         const errorMessage = document.getElementById('login-error');
-        if (Object.hasOwn(messages, error)) {
-            errorMessage.textContent = messages[error];
+        if (error == 'invalid') {
+            errorMessage.textContent = 'The email or password is incorrect.';
             errorMessage.hidden = false;
         }
     </script>

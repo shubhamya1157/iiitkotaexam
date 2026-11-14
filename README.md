@@ -3,21 +3,23 @@
 A web-based exam application built using **HTML, CSS, JavaScript, PHP, and MySQL**.
 
 - **Frontend:** HTML, CSS, JavaScript
-- **Backend:** PHP
+- **Backend:** Procedural PHP
 - **Database:** MySQL
-- **Database connection:** MySQLi
+- **Database connection:** Procedural MySQLi (`mysqli_connect`, `mysqli_query`, `mysqli_fetch_assoc`)
 - **Database management:** phpMyAdmin
+
+The code uses basic functions, `if` statements, loops, and sessions. Text is escaped with `mysqli_real_escape_string` before being used in SQL. `htmlspecialchars` displays text safely in HTML.
 
 ## Folder Structure
 
 ```text
 iiitkotaexam/
 ├── backend/
-│   ├── auth.php             # Checks credentials and manages session access
+│   ├── auth.php             # Starts the session and checks the user's role
 │   ├── db.php               # Opens the MySQL connection
-│   ├── exam.php             # Handles quiz scheduling, grading, and form tokens
-│   ├── login.php            # Processes login form submissions
-│   ├── logout.php           # Ends the session and expires its cookie
+│   ├── exam.php             # Handles quiz scheduling and grading
+│   ├── login.php            # Checks the email and password, then opens a dashboard
+│   ├── logout.php           # Ends the session and returns to login
 │   └── schema.sql           # Creates the database and tables
 ├── frontend/
 │   ├── admin/
@@ -144,13 +146,12 @@ mysql --version
 Check MySQLi extension:
 
 ```bash
-php -m | grep -Ei "^(mysqli|mbstring)$"
+php -m | grep mysqli
 ```
 
 Expected output:
 
 ```text
-mbstring
 mysqli
 ```
 
@@ -263,10 +264,10 @@ This creates a dedicated MySQL user for the PHP application and inserts a test s
 
 ## 5. Start the PHP Development Server
 
-Open a terminal in the project root and pass the MySQL application account password through the `QUIZ_DB_PASSWORD` environment variable.
+Set the MySQL username and password in `backend/db.php`. Its default values match the example database account above. Open a terminal in the project root and run:
 
 ```bash
-QUIZ_DB_PASSWORD='local_db_password' php -S 127.0.0.1:8000
+php -S 127.0.0.1:8000
 ```
 
 Expected output:
@@ -278,7 +279,7 @@ http://127.0.0.1:8000
 
 Keep this terminal open while using the application.
 
-The PHP development server serves both frontend files and backend PHP scripts.
+The PHP development server serves both frontend files and backend PHP scripts. The existing `QUIZ_DB_PASSWORD='your_password' php -S 127.0.0.1:8000` command also works.
 
 # Application URLs and Endpoints
 
@@ -288,20 +289,17 @@ The PHP server runs on port `8000`.
 
 | Page | URL |
 |---|---|
-| Homepage | http://127.0.0.1:8000/frontend/index.html |
-| Login page | http://127.0.0.1:8000/frontend/login.html |
-| Admin dashboard | http://127.0.0.1:8000/frontend/admin/dashboard.php |
-| Student dashboard | http://127.0.0.1:8000/frontend/student/dashboard.php |
+| Homepage | http://localhost:8000/frontend/index.html |
+| Login page | http://localhost:8000/frontend/login.html |
+| Admin dashboard | http://localhost:8000/frontend/admin/dashboard.php |
+| Student dashboard | http://localhost:8000/frontend/student/dashboard.php |
 
 ## Login and Sessions
 
 1. The login form sends the email and password to `backend/login.php`. The server checks the credentials against MySQL and reads the account role.
 2. After a successful login, PHP generates a fresh session ID and stores the user ID and role in the server-side session. The browser receives a cookie containing the session ID.
 3. On later requests, the browser sends the cookie so PHP can load the session. Each dashboard checks that the session has the required role before loading quiz data.
-4. Quiz and logout forms include a CSRF token. The server compares it with the token stored in the session before processing the submission.
-5. Logging out destroys the session, expires the cookie, and returns the browser to the login page.
-
-The session cookie uses `HttpOnly` and `SameSite=Lax`. PHP adds `Secure` when it detects HTTPS.
+4. Logging out clears and destroys the session, then returns the browser to the login page.
 
 # Ports Used
 
@@ -324,4 +322,4 @@ These are development-only credentials.
 
 Sign in as an admin to create a multiple-choice quiz and schedule its opening and closing times in IST. All student accounts can submit one attempt during that window. Students see their scores after submission, and admins can view submissions on their dashboard.
 
-For an existing database, reimport the schema and apply the quiz table grants above. PHP 8.2 or newer with MySQLi and mbstring is required.
+For an existing database, reimport the schema and apply the quiz table grants above. PHP 8.2 or newer with MySQLi is required.

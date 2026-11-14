@@ -1,50 +1,31 @@
 <?php
 
-require_once __DIR__ . '/auth.php';
+require 'auth.php';
 
-// The login form submits with POST. Send direct visits back to the form.
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+if ($_SERVER['REQUEST_METHOD'] != 'POST') {
     header('Location: ../frontend/login.html');
     exit;
 }
 
-// Use an empty string for missing fields. Trim only the email.
-$email = trim((string) ($_POST['email'] ?? ''));
-$password = (string) ($_POST['password'] ?? '');
+$db = require __DIR__ . '/db.php';
 
-if ($email === '' || $password === '') {
-    header('Location: ../frontend/login.html?error=invalid');
-    exit;
-}
+// Read the form and find the user by email.
+$email = mysqli_real_escape_string($db, $_POST['email'] ?? '');
+$password = $_POST['password'] ?? '';
+$result = mysqli_query($db, "SELECT id, password, role FROM users WHERE email = '$email'");
+$user = mysqli_fetch_assoc($result);
 
-// Connect to MySQL and check the submitted credentials.
-try {
-    require __DIR__ . '/db.php';
-    $user = authenticate($db, $email, $password);
-} catch (mysqli_sql_exception | RuntimeException $exception) {
-    // Log the technical details on the server and show a simple error.
-    error_log('Quiz login database error: ' . $exception->getMessage());
-    header('Location: ../frontend/login.html?error=unavailable');
-    exit;
-}
+if ($user && $password === $user['password']) {
+    session_regenerate_id(true);
+    $_SESSION['user_id'] = $user['id'];
+    $_SESSION['role'] = $user['role'];
 
-if ($user === null) {
-    header('Location: ../frontend/login.html?error=invalid');
-    exit;
-}
-
-// Give the logged-in user a fresh session ID and remember their ID and role.
-start_app_session();
-session_regenerate_id(true);
-$_SESSION['user_id'] = $user['id'];
-$_SESSION['role'] = $user['role'];
-
-// Choose the dashboard for the role returned by authenticate().
-if ($user['role'] === 'admin') {
-    $dashboard = '../frontend/admin/dashboard.php';
+    if ($user['role'] == 'admin') {
+        header('Location: ../frontend/admin/dashboard.php');
+    } else {
+        header('Location: ../frontend/student/dashboard.php');
+    }
 } else {
-    $dashboard = '../frontend/student/dashboard.php';
+    header('Location: ../frontend/login.html?error=invalid');
 }
-
-header('Location: ' . $dashboard);
 exit;

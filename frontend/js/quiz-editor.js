@@ -8,21 +8,22 @@ function updateButtons() {
     remove.disabled = questions.children.length <= 1;
 }
 
-add.addEventListener('click', () => {
+add.onclick = function () {
     const index = questions.children.length;
     const fields = template.content.cloneNode(true);
     fields.querySelector('legend').textContent = 'Question ' + (index + 1);
-    fields.querySelectorAll('[name]').forEach(field => {
-        field.name = field.name.replace('questions[0]', 'questions[' + index + ']');
-    });
+    const inputs = fields.querySelectorAll('[name]');
+    for (let i = 0; i < inputs.length; i++) {
+        inputs[i].name = inputs[i].name.replace('questions[0]', 'questions[' + index + ']');
+    }
     questions.append(fields);
     questions.lastElementChild.querySelector('textarea').focus();
     updateButtons();
-});
+};
 
-remove.addEventListener('click', () => {
+remove.onclick = function () {
     questions.lastElementChild.remove();
     updateButtons();
-});
+};
 
 updateButtons();

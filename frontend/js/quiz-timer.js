@@ -5,6 +5,13 @@ const startedAt = performance.now();
 const submit = document.querySelector('#submit-quiz');
 const status = document.querySelector('#quiz-timer-status');
 
+function twoDigits(number) {
+    if (number < 10) {
+        return '0' + number;
+    }
+    return number;
+}
+
 function updateCountdown() {
     const elapsed = (performance.now() - startedAt) / 1000;
     const remaining = Math.max(0, Math.ceil(deadline - serverTime - elapsed));
@@ -19,9 +26,8 @@ function updateCountdown() {
     const hours = Math.floor(remaining / 3600);
     const minutes = Math.floor(remaining / 60) % 60;
     const seconds = remaining % 60;
-    const clock = [hours, minutes, seconds].map(value => String(value).padStart(2, '0'));
-    timer.textContent = 'Time remaining: ' + clock.join(':');
-    setTimeout(updateCountdown, 250);
+    timer.textContent = 'Time remaining: ' + twoDigits(hours) + ':' + twoDigits(minutes) + ':' + twoDigits(seconds);
+    setTimeout(updateCountdown, 1000);
 }
 
 updateCountdown();

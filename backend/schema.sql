@@ -35,4 +35,4 @@ CREATE TABLE IF NOT EXISTS quiz_attempts (
     submitted_at BIGINT NOT NULL,
     PRIMARY KEY (quiz_id, student_id),
     FOREIGN KEY (quiz_id) REFERENCES quizzes(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) 
