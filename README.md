@@ -281,9 +281,116 @@ Keep this terminal open while using the application.
 
 The PHP development server serves both frontend files and backend PHP scripts. The existing `QUIZ_DB_PASSWORD='your_password' php -S 127.0.0.1:8000` command also works.
 
+# How to Run Locally (Windows using XAMPP)
+
+## 1. Install XAMPP
+
+Open the downloaded XAMPP installer. Keep **Apache, PHP, MySQL and phpMyAdmin** selected and install it in:
+
+```text
+C:\xampp
+```
+
+Use a XAMPP version with **PHP 8.2 or newer**, as required by this project. Finish the installation and open **XAMPP Control Panel**.
+
+## 2. Copy the Project into htdocs
+
+Copy the entire original `iiitkotaexam` folder into `C:\xampp\htdocs`. Keep both the `backend` and `frontend` folders inside it.
+
+Check that these files are present:
+
+```text
+C:\xampp\htdocs\iiitkotaexam\README.md
+C:\xampp\htdocs\iiitkotaexam\backend\db.php
+C:\xampp\htdocs\iiitkotaexam\backend\schema.sql
+C:\xampp\htdocs\iiitkotaexam\frontend\index.html
+C:\xampp\htdocs\iiitkotaexam\frontend\login.html
+```
+
+## 3. Start Apache and MySQL
+
+In **XAMPP Control Panel**, click **Start** beside both services:
+
+| Service | Purpose |
+| --- | --- |
+| Apache | Serves the frontend and runs the PHP backend. |
+| MySQL | Runs the database used by the application. |
+
+Open [http://localhost/](http://localhost/) in your browser. You should see the XAMPP welcome page.
+
+## 4. Import the Database
+
+Open [http://localhost/phpmyadmin/](http://localhost/phpmyadmin/).
+
+1. From the phpMyAdmin home page, select the **Import** tab.
+2. Click **Choose File** and select `C:\xampp\htdocs\iiitkotaexam\backend\schema.sql`.
+3. Click **Import** or **Go**, depending on your phpMyAdmin version.
+4. Select the `iiitkotaexam` database and check that it contains `users`, `quizzes` and `quiz_attempts`.
+
+The SQL file creates the database, so you do not need to create it manually first. It does not create the application database user or demo login accounts; add those in the next step.
+
+## 5. Create the Database User and Test Accounts
+
+For a fresh Windows setup, open the **SQL** tab in phpMyAdmin, paste the following statements, and click **Go**:
+
+```sql
+CREATE USER IF NOT EXISTS 'quiz_app'@'127.0.0.1'
+IDENTIFIED BY 'local_db_password';
+
+GRANT SELECT ON iiitkotaexam.users
+TO 'quiz_app'@'127.0.0.1';
+
+GRANT SELECT, INSERT ON iiitkotaexam.quizzes
+TO 'quiz_app'@'127.0.0.1';
+
+GRANT SELECT, INSERT ON iiitkotaexam.quiz_attempts
+TO 'quiz_app'@'127.0.0.1';
+
+INSERT INTO iiitkotaexam.users (email, password, role)
+VALUES
+    ('student@example.com', 'demo123', 'student'),
+    ('admin@example.com', 'demo123', 'admin');
+```
+
+Run the test-account insert only once because email addresses must be unique. If `quiz_app` already exists, the command above keeps its existing password; use that password in `backend/db.php`.
+
+## 6. Check the PHP Database Connection
+
+Open `C:\xampp\htdocs\iiitkotaexam\backend\db.php`. Its existing default settings match the new database user:
+
+```php
+$host = '127.0.0.1';
+$username = 'quiz_app';
+$password = 'local_db_password';
+$database = 'iiitkotaexam';
+```
+
+Keep these values for the fresh setup above. The database password here belongs to `quiz_app`; it is separate from the `demo123` password used to log in to the website.
+
+## 7. Open the Application
+
+Use these addresses while Apache and MySQL are running:
+
+| Page | Windows XAMPP URL |
+| --- | --- |
+| Homepage | [http://localhost/iiitkotaexam/frontend/index.html](http://localhost/iiitkotaexam/frontend/index.html) |
+| Login page | [http://localhost/iiitkotaexam/frontend/login.html](http://localhost/iiitkotaexam/frontend/login.html) |
+| Admin dashboard | [http://localhost/iiitkotaexam/frontend/admin/dashboard.php](http://localhost/iiitkotaexam/frontend/admin/dashboard.php) |
+| Student dashboard | [http://localhost/iiitkotaexam/frontend/student/dashboard.php](http://localhost/iiitkotaexam/frontend/student/dashboard.php) |
+
+Sign in using the [test login credentials](#test-login-credentials) below. The application opens the dashboard for your account's role.
+
+Apache runs PHP in this setup, so you do not need the `php -S` commands from the macOS instructions. With the default XAMPP settings, Apache and phpMyAdmin use port `80`, and the database uses port `3306`.
+
+## 8. Run and Edit the Project Later
+
+Start **Apache** and **MySQL** in XAMPP Control Panel whenever you want to use the application. Open the project folder inside `htdocs` in your editor, save your changes, and refresh the browser. The database import and account creation are one-time setup steps.
+
+XAMPP reference: [Official Windows FAQ](https://www.apachefriends.org/faq_windows.html).
+
 # Application URLs and Endpoints
 
-The PHP server runs on port `8000`.
+The macOS PHP development server runs on port `8000`. For Windows XAMPP, use the URLs in the Windows setup section above.
 
 ## Frontend Pages
 
@@ -302,6 +409,8 @@ The PHP server runs on port `8000`.
 4. Logging out clears and destroys the session, then returns the browser to the login page.
 
 # Ports Used
+
+These ports apply to the macOS setup. The Windows XAMPP ports are listed in its setup section above.
 
 | Service | Port | Purpose |
 |---|---:|---|
