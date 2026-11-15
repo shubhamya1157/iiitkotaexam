@@ -20,7 +20,7 @@ iiitkotaexam/
 │   ├── exam.php             # Handles quiz scheduling and grading
 │   ├── login.php            # Checks the email and password, then opens a dashboard
 │   ├── logout.php           # Ends the session and returns to login
-│   └── schema.sql           # Creates the database and tables
+│   └── schema.sql           # Creates database, tables, database user and demo accounts
 ├── frontend/
 │   ├── admin/
 │   │   └── dashboard.php    # Creates quizzes and displays submissions
@@ -89,6 +89,26 @@ CREATE TABLE IF NOT EXISTS quiz_attempts (
     PRIMARY KEY (quiz_id, student_id),
     FOREIGN KEY (quiz_id) REFERENCES quizzes(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Local development accounts. Import this file as MySQL root or an administrator.
+CREATE USER IF NOT EXISTS 'quiz_app'@'127.0.0.1'
+IDENTIFIED BY 'local_db_password';
+
+GRANT SELECT ON iiitkotaexam.users
+TO 'quiz_app'@'127.0.0.1';
+
+GRANT SELECT, INSERT ON iiitkotaexam.quizzes
+TO 'quiz_app'@'127.0.0.1';
+
+GRANT SELECT, INSERT ON iiitkotaexam.quiz_attempts
+TO 'quiz_app'@'127.0.0.1';
+
+-- Add demo website logins; keep existing accounts unchanged on reimport.
+INSERT INTO users (email, password, role)
+VALUES
+    ('student@example.com', 'demo123', 'student'),
+    ('admin@example.com', 'demo123', 'admin')
+ON DUPLICATE KEY UPDATE email = VALUES(email);
 ```
 
 # How to Run Locally (macOS)
@@ -230,37 +250,20 @@ http://127.0.0.1:8080/
 
 Keep this terminal open while using phpMyAdmin.
 
-## 4. Create the Application Database User
+## 4. Check the Application Database User
 
-In the MySQL command line or phpMyAdmin SQL tab, execute:
+Importing `backend/schema.sql` as MySQL root or an administrator creates the database user and demo website accounts automatically. No separate account-creation commands are needed.
 
-```sql
-CREATE USER IF NOT EXISTS 'quiz_app'@'127.0.0.1'
-IDENTIFIED BY 'local_db_password';
+| Database setting | Value |
+| --- | --- |
+| Host | `127.0.0.1` |
+| Username | `quiz_app` |
+| Password | `local_db_password` |
+| Database | `iiitkotaexam` |
 
-GRANT SELECT ON iiitkotaexam.users
-TO 'quiz_app'@'127.0.0.1';
+These settings match `backend/db.php`. The database user can read users and read/insert quizzes and quiz attempts.
 
-GRANT SELECT, INSERT ON iiitkotaexam.quizzes
-TO 'quiz_app'@'127.0.0.1';
-
-GRANT SELECT, INSERT ON iiitkotaexam.quiz_attempts
-TO 'quiz_app'@'127.0.0.1';
-
-INSERT INTO iiitkotaexam.users (email, password, role)
-VALUES
-    ('student@example.com', 'demo123', 'student'),
-    ('admin@example.com', 'demo123', 'admin');
-```
-
-This creates a dedicated MySQL user for the PHP application and inserts a test student and a test admin.
-
-**Important:**
-
-- If `quiz_app` already exists, use its existing password.
-- Insert each test account only once because email addresses must be unique.
-- This example assumes the current database uses a `password` column.
-- The example uses plain-text passwords for development only.
+If `quiz_app` already exists, importing keeps its existing password; set that password in `backend/db.php`. Reimporting also keeps existing website accounts unchanged. The demo website logins are listed under [Test Login Credentials](#test-login-credentials).
 
 ## 5. Start the PHP Development Server
 
@@ -327,32 +330,18 @@ Open [http://localhost/phpmyadmin/](http://localhost/phpmyadmin/).
 3. Click **Import** or **Go**, depending on your phpMyAdmin version.
 4. Select the `iiitkotaexam` database and check that it contains `users`, `quizzes` and `quiz_attempts`.
 
-The SQL file creates the database, so you do not need to create it manually first. It does not create the application database user or demo login accounts; add those in the next step.
+The SQL file creates the database, tables, application database user and demo login accounts. Import it as MySQL root or an administrator so it can create the user and grant permissions.
 
-## 5. Create the Database User and Test Accounts
+## 5. Check the Database User and Test Accounts
 
-For a fresh Windows setup, open the **SQL** tab in phpMyAdmin, paste the following statements, and click **Go**:
+The schema import already creates `quiz_app` at host `127.0.0.1` with password `local_db_password`, plus these website accounts:
 
-```sql
-CREATE USER IF NOT EXISTS 'quiz_app'@'127.0.0.1'
-IDENTIFIED BY 'local_db_password';
+| Role | Email | Password |
+| --- | --- | --- |
+| Student | `student@example.com` | `demo123` |
+| Admin | `admin@example.com` | `demo123` |
 
-GRANT SELECT ON iiitkotaexam.users
-TO 'quiz_app'@'127.0.0.1';
-
-GRANT SELECT, INSERT ON iiitkotaexam.quizzes
-TO 'quiz_app'@'127.0.0.1';
-
-GRANT SELECT, INSERT ON iiitkotaexam.quiz_attempts
-TO 'quiz_app'@'127.0.0.1';
-
-INSERT INTO iiitkotaexam.users (email, password, role)
-VALUES
-    ('student@example.com', 'demo123', 'student'),
-    ('admin@example.com', 'demo123', 'admin');
-```
-
-Run the test-account insert only once because email addresses must be unique. If `quiz_app` already exists, the command above keeps its existing password; use that password in `backend/db.php`.
+You do not need to run any extra SQL. Reimporting keeps existing accounts unchanged. If `quiz_app` already existed, use its existing database password in `backend/db.php`.
 
 ## 6. Check the PHP Database Connection
 
@@ -431,4 +420,4 @@ These are development-only credentials.
 
 Sign in as an admin to create a multiple-choice quiz and schedule its opening and closing times in IST. All student accounts can submit one attempt during that window. Students see their scores after submission, and admins can view submissions on their dashboard.
 
-For an existing database, reimport the schema and apply the quiz table grants above. PHP 8.2 or newer with MySQLi is required.
+For an existing database, reimport the schema as MySQL root or an administrator to apply the quiz table grants automatically. PHP 8.2 or newer with MySQLi is required.
