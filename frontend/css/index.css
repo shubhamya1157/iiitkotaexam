@@ -33,6 +33,18 @@ h1, h2, h3 {
     padding: clamp(1rem, 6vw, 4rem) 1rem;
 }
 
+.login-page {
+    min-height: 100vh;
+    align-content: center;
+    background: #f1f5f9;
+}
+
+.home-page {
+    min-height: 100vh;
+    align-content: center;
+    background: #f1f5f9;
+}
+
 .welcome, .auth-card {
     width: 100%;
     max-width: 28rem;
@@ -46,13 +58,52 @@ h1, h2, h3 {
     max-width: 40rem;
 }
 
+.home-page .welcome {
+    max-width: 44rem;
+    padding: clamp(2rem, 7vw, 4rem);
+    border-color: #e2e8f0;
+    border-radius: 1rem;
+    box-shadow: 0 18px 48px rgba(30, 50, 80, 0.1);
+}
+
+.home-page .welcome::before {
+    content: "IIIT KOTA  ·  EXAM PORTAL";
+    display: block;
+    margin-bottom: 1.1rem;
+    color: #214ba7;
+    font-size: 0.72rem;
+    font-weight: 750;
+    letter-spacing: 0.12em;
+}
+
 .entry-page h1 {
     margin: 0;
     font-size: clamp(1.5rem, 4vw, 2rem);
 }
 
+.home-page h1 {
+    color: #172033;
+    font-size: clamp(2rem, 6vw, 3rem);
+    letter-spacing: -0.045em;
+    line-height: 1.08;
+}
+
 .entry-page p {
     color: var(--muted);
+}
+
+.home-page .welcome p {
+    max-width: 34rem;
+    margin: 1rem 0 1.5rem;
+    color: #64748b;
+    font-size: clamp(1rem, 2.5vw, 1.1rem);
+}
+
+.home-page .welcome-login {
+    margin-top: 0;
+    padding: 0.8rem 1.5rem;
+    border-radius: 0.6rem;
+    font-weight: 700;
 }
 
 .eyebrow {
@@ -62,20 +113,36 @@ h1, h2, h3 {
 
 .auth-card form {
     display: grid;
-    gap: 0.5rem;
+    gap: 0.55rem;
+    margin-top: 1.5rem;
 }
 
 .auth-card label {
     font-weight: 600;
+    color: #334155;
 }
 
 .auth-card input {
     width: 100%;
-    margin-bottom: 0.5rem;
-    padding: 0.7rem;
-    border: 1px solid #8597ad;
-    border-radius: 0.45rem;
+    margin-bottom: 0.4rem;
+    padding: 0.8rem 0.9rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.6rem;
+    background: #fbfdff;
+    color: #172033;
     font: inherit;
+    transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
+}
+
+.auth-card input:hover {
+    border-color: #94a3b8;
+}
+
+.auth-card input:focus {
+    outline: none;
+    border-color: #214ba7;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(33, 75, 167, 0.14);
 }
 
 .welcome-login, .auth-card button {
@@ -96,10 +163,47 @@ h1, h2, h3 {
     background: #193b87;
 }
 
+.login-page .auth-card {
+    max-width: 27rem;
+    padding: clamp(1.75rem, 6vw, 2.75rem);
+    border-color: #e2e8f0;
+    border-radius: 1rem;
+    box-shadow: 0 18px 48px rgba(30, 50, 80, 0.1);
+}
+
+.login-page .auth-card::before {
+    content: "IIIT KOTA  ·  EXAM PORTAL";
+    display: block;
+    margin-bottom: 1rem;
+    color: #214ba7;
+    font-size: 0.72rem;
+    font-weight: 750;
+    letter-spacing: 0.12em;
+}
+
+.login-page .auth-card h1 {
+    color: #172033;
+    font-size: clamp(1.8rem, 5vw, 2.15rem);
+    letter-spacing: -0.04em;
+}
+
+.login-page .auth-card > p:not(.message) {
+    margin: 0.65rem 0 0;
+}
+
+.login-page .auth-card form button {
+    width: 100%;
+    margin-top: 0.4rem;
+    padding: 0.8rem 1.25rem;
+    border-radius: 0.6rem;
+    font-weight: 700;
+}
+
 .back-link {
     display: inline-block;
-    margin-top: 1rem;
+    margin-top: 1.25rem;
     color: var(--accent);
+    font-size: 0.93rem;
 }
 
 .entry-page .message.error {
